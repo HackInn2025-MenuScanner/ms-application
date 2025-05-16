@@ -9,7 +9,7 @@ from service import (
     process_menu_text
 )
 
-from models import MenuItems
+from models import MenuItems, CombinedDishInfo
 
 router = APIRouter()
 
@@ -65,7 +65,10 @@ async def get_dish_description(dish_name: str, language: str = "en"):
             detail=f"Error retrieving dish description: {str(e)}"
         )
 
-@router.get("/dish/{dish_name}")
+@router.get("/dish/{dish_name}",
+            response_model=CombinedDishInfo,
+            summary="Get full dish information",
+            description="Get comprehensive dish information including nutrition facts, image, and description")
 async def get_full_dish_info(dish_name: str, language: str = "en"):
     """
     Get comprehensive dish information combining nutrition facts, image, and description
