@@ -11,5 +11,13 @@ export default defineConfig({
 			project: './project.inlang',
 			outdir: './src/lib/paraglide'
 		})
-	]
+	],
+	assetsInclude: ['**/*.svg'],
+	server: {
+		host: '0.0.0.0',
+		watch: {
+			usePolling: true,
+			interval: 1000
+		}
+	},
 });
