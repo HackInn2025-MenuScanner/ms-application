@@ -1,9 +1,10 @@
 import base64
 import os
-from typing import Dict, Any
 
 import httpx
 from fastapi import HTTPException
+
+from models import Nutrients, FoodNutrition
 
 FATSECRET_CLIENT_ID = os.getenv("FATSECRET_CLIENT_ID", "")
 FATSECRET_CLIENT_SECRET = os.getenv("FATSECRET_CLIENT_SECRET", "")
@@ -47,7 +48,7 @@ async def get_oauth_token() -> str:
         return response.json().get("access_token")
 
 
-async def get_nutrition_facts(dish_name: str) -> Dict[str, Any]:
+async def get_nutrition_facts(dish_name: str) -> FoodNutrition:
     """Get nutrition facts for a dish from FatSecret API"""
     token = await get_oauth_token()
 
@@ -94,20 +95,20 @@ async def get_nutrition_facts(dish_name: str) -> Dict[str, Any]:
         carbs = extract_nutrient(nutrient_str, "Carbs", "g")
         protein = extract_nutrient(nutrient_str, "Protein", "g")
 
-        return {
-            "dish_name": dish_name,
-            "food_name": food.get("food_name", dish_name),
-            "food_id": food.get("food_id", ""),
-            "nutrients": {
-                "calories": calories,
-                "protein_g": protein,
-                "fat_g": fat,
-                "carbs_g": carbs,
-                "fiber_g": 0.0,
-            },
-            "food_description": nutrient_str,
-            "food_url": food.get("food_url", "")
-        }
+        return FoodNutrition(
+            dish_name=dish_name,
+            food_name=food.get("food_name", dish_name),
+            food_id=food.get("food_id", ""),
+            nutrients=Nutrients(
+                calories=calories,
+                protein_g=protein,
+                fat_g=fat,
+                carbs_g=carbs,
+                fiber_g=0.0,
+            ),
+            food_description=nutrient_str,
+            food_url=food.get("food_url", "")
+        )
 
 
 def extract_nutrient(nutrient_str: str, nutrient_name: str, unit: str) -> float:
