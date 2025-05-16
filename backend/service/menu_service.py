@@ -18,7 +18,8 @@ async def process_menu_text(menu_text: str, language: str = "en") -> MenuItems:
         )
 
     prompt = (
-        f"Below is raw text from a menu. Extract each dish name and translate it to {language}.\n\n"
+        f"Below is raw text from a menu (its extracted with OCR, so it could contain some strange characters - therefore extract only the dishes names, that make sence)"
+        f". Extract each dish name and translate it to {language}.\n\n"
         f"Raw menu text:\n{menu_text}\n\n"
         f"Format each dish exactly as follows (one per line):\n"
         f"original_name, translated_name\n\n"
