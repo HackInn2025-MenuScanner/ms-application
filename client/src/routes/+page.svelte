@@ -50,9 +50,16 @@
 		ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
 		try {
-			const result = await Tesseract.recognize(canvas.toDataURL('image/png'), 'eng');
+			const result = await Tesseract.recognize(applyThreshold(canvas), 'eng');
 			console.log('OCR Result:', result.data.text);
       //Make api calls
+      const res = await fetch('/api/fastapi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ menu_text: result.data.text, language: "de" })
+      });
+      const data = await res.json();
+      console.log("response: " + data);
 
       //Show new Page
       showSelectionScreen = true;
@@ -64,6 +71,28 @@
 		capturing = false;
 	}
 
+function applyThreshold(canvas: HTMLCanvasElement) {
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return '';
+
+  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imgData.data;
+
+  const threshold = 128; // Threshold value for binary conversion
+
+  // Apply threshold to each pixel
+  for (let i = 0; i < data.length; i += 4) {
+    const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+    const color = avg > threshold ? 255 : 0;
+    data[i] = data[i + 1] = data[i + 2] = color; // Set R, G, B to the thresholded value
+  }
+
+  ctx.putImageData(imgData, 0, 0);
+
+  // Return the thresholded image as a Data URL
+  return canvas.toDataURL('image/png');
+}
+
   let showIntroScreen = $state(true);
   let showSelectionScreen = $state(false)
 </script>
@@ -74,13 +103,11 @@
   transition:fade={{duration: 200}}
 >
 	<div
-		class="icon"
+		class="icon h-62 w-62"
 		style="background-image: url('/icons/icon_big.svg');
     background-size: contain;
     background-repeat: no-repeat;
-    background-position: center;
-    height: 300px;
-    width: 300px;"
+    background-position: center;"
 	></div>
 </div>
 {/if}
