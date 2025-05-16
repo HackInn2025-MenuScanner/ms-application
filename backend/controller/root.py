@@ -1,10 +1,12 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Body
+from typing import Dict
 
 from service import (
     get_fatsecret_nutrition_facts,
     get_themealdb_food_image,
     get_gemini_dish_description,
-    get_combined_dish_info
+    get_combined_dish_info,
+    process_menu_text
 )
 
 router = APIRouter()
@@ -74,4 +76,29 @@ async def get_full_dish_info(dish_name: str, language: str = "en"):
         raise HTTPException(
             status_code=500,
             detail=f"Error retrieving dish information: {str(e)}"
+        )
+
+
+@router.post("/menu/translate")
+async def translate_menu(menu_data: Dict = Body(...)):
+    """
+    Process raw menu text and translate dish names to the specified language
+    """
+    menu_text = menu_data.get("menu_text", "")
+    language = menu_data.get("language", "en")
+
+    if not menu_text:
+        raise HTTPException(
+            status_code=400,
+            detail="Menu text is required"
+        )
+
+    try:
+        return await process_menu_text(menu_text, language)
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error processing menu: {str(e)}"
         )
