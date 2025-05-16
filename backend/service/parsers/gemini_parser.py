@@ -73,3 +73,50 @@ async def get_dish_description(dish_name: str, language: str = "en") -> DishDesc
             description=description,
             language=language
         )
+
+async def normalize_dish_name(dish_name: str) -> str:
+    """
+    Normalize a dish name using Gemini to get a clean version for API searches
+    """
+    if not GEMINI_API_KEY:
+        return dish_name
+
+    prompt = (
+        f"I need to search for information about '{dish_name}'. "
+        f"Return ONLY a clean normalized version of this dish name with no special characters (like '+') "
+        f"and with proper spacing. Just return the name itself with no other text or explanation."
+    )
+
+    payload = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": prompt}
+                ]
+            }
+        ],
+        "generationConfig": {
+            "temperature": 0.1,
+            "maxOutputTokens": 50,
+            "topP": 0.95
+        }
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(
+                GEMINI_API_URL,
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                params={"key": GEMINI_API_KEY}
+            )
+
+            if response.status_code != 200:
+                return dish_name
+
+            data = response.json()
+            normalized = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+            normalized = normalized.replace('"', '').replace("'", "").strip()
+            return normalized if normalized else dish_name
+        except Exception:
+            return dish_name
