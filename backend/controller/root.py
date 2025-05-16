@@ -1,6 +1,11 @@
 from fastapi import APIRouter, HTTPException
 
-from service import get_fatsecret_nutrition_facts, get_themealdb_food_image, get_gemini_dish_description
+from service import (
+    get_fatsecret_nutrition_facts,
+    get_themealdb_food_image,
+    get_gemini_dish_description,
+    get_combined_dish_info
+)
 
 router = APIRouter()
 
@@ -54,4 +59,19 @@ async def get_dish_description(dish_name: str, language: str = "en"):
         raise HTTPException(
             status_code=500,
             detail=f"Error retrieving dish description: {str(e)}"
+        )
+
+@router.get("/dish/{dish_name}")
+async def get_full_dish_info(dish_name: str, language: str = "en"):
+    """
+    Get comprehensive dish information combining nutrition facts, image, and description
+    """
+    try:
+        return await get_combined_dish_info(dish_name, language)
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error retrieving dish information: {str(e)}"
         )
