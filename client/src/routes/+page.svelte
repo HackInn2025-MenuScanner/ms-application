@@ -50,7 +50,10 @@
 		ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
 		try {
-			const result = await Tesseract.recognize(applyThreshold(canvas), 'eng');
+			const result = await Tesseract.recognize(applyThreshold(canvas), 'eng', {
+        tessedit_pageseg_mode: 9,
+        oem: 2
+    });
 			console.log('OCR Result:', result.data.text);
       //Make api calls
       const res = await fetch('/api/fastapi', {
