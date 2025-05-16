@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from service import get_fatsecret_nutrition_facts, get_themealdb_food_image
+from service import get_fatsecret_nutrition_facts, get_themealdb_food_image, get_gemini_dish_description
 
 router = APIRouter()
 
@@ -39,4 +39,19 @@ async def get_meal_image(dish_name: str):
         raise HTTPException(
             status_code=500,
             detail=f"Error retrieving food image: {str(e)}"
+        )
+
+@router.get("/gemini/description/{dish_name}")
+async def get_dish_description(dish_name: str, language: str = "en"):
+    """
+    Get dish description using Google's Gemini 1.5 Flash model
+    """
+    try:
+        return await get_gemini_dish_description(dish_name, language)
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error retrieving dish description: {str(e)}"
         )
