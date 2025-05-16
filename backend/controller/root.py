@@ -9,6 +9,8 @@ from service import (
     process_menu_text
 )
 
+from models import MenuItems
+
 router = APIRouter()
 
 @router.get("/")
@@ -79,7 +81,11 @@ async def get_full_dish_info(dish_name: str, language: str = "en"):
         )
 
 
-@router.post("/menu/translate")
+@router.post("/menu/translate",
+    response_model = MenuItems,
+    summary = "Translate menu items",
+    description = "Extract dish names from raw menu text and translate them to specified language"
+)
 async def translate_menu(menu_data: Dict = Body(...)):
     """
     Process raw menu text and translate dish names to the specified language
