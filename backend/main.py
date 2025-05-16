@@ -1,5 +1,7 @@
+from dotenv import load_dotenv
 from fastapi import FastAPI
-from controller import root_router
+load_dotenv()
+from controller.root import router
 app = FastAPI()
 
-app.include_router(root_router)
+app.include_router(router)

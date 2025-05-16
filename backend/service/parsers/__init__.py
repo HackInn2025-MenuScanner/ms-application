@@ -1,0 +1,1 @@
+from .fatsecret_parser import get_nutrition_facts
