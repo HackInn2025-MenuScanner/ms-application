@@ -4,3 +4,7 @@ body {
     height: 100vh;
     background: gray;
 }
+
+.blur {
+    filter: blur(4px);
+}
