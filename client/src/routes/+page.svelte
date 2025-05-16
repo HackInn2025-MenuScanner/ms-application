@@ -1,12 +1,18 @@
-<script>
+<script module lang="ts">
+  // Declare Tesseract globally (e.g., from a <script> tag or external source)
+  declare const Tesseract: any;
+</script>
+
+<script lang="ts">
   import { onMount } from 'svelte';
 
-  let video;
-  let canvas;
-  let stream;
+  let video: HTMLVideoElement;
+  let canvas: HTMLCanvasElement;
+  let stream: MediaStream | null = null;
   let capturing = $state(false);
 
   onMount(async () => {
+    // Dynamically load Tesseract script
     const script = document.createElement('script');
     script.src = '/tesseract.min.js';
     script.async = true;
@@ -14,41 +20,48 @@
 
     try {
       stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      video.srcObject = stream;
-      await video.play();
+      if (video) {
+        video.srcObject = stream;
+        await video.play();
+      }
     } catch (err) {
       console.error('Camera access error:', err);
     }
   });
 
-  async function captureAndRecognize() {
+  async function captureAndRecognize(): Promise<void> {
     if (!canvas || !video) return;
     capturing = true;
 
     const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.error('Could not get canvas context');
+      capturing = false;
+      return;
+    }
+
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-
-    // Draw the current frame from the video to canvas
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Get image data from canvas
-    const dataURL = canvas.toDataURL('image/png');
-
     console.log('Running OCR...');
-    const result = await Tesseract.recognize(dataURL, 'eng', {
-      logger: m => console.log(m),
-    });
+    try {
+      const result = await Tesseract.recognize(canvas.toDataURL('image/png'), 'eng');
+      console.log('OCR Result:', result.data.text);
+    } catch (error) {
+      console.error('OCR failed:', error);
+    }
 
-    console.log('OCR Result:', result.data.text);
     capturing = false;
   }
 </script>
 
-<video bind:this={video} autoplay playsinline style="width: 100%; max-width: 500px;" >
-  <track kind="captions">`
+<video bind:this={video} autoplay playsinline style="width: 100%; max-width: 500px;">
+  <track kind="captions" />
 </video>
-<br />
+
+<br/>
+
 <button onclick={captureAndRecognize} disabled={capturing}>
   {capturing ? 'Processing...' : 'Capture & OCR'}
 </button>
