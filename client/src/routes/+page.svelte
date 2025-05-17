@@ -119,11 +119,17 @@
 
 {#if store.data.length}
 <style>
-  .container {
+  .maincontainer {
     padding: 1rem;
     background: #FFFFFF;
     min-height: 100vh;
     box-sizing: border-box;
+	width: 100vw;
+  }
+  .innercontainer {
+	width: min(95vw, 600px);
+	max-width: 600px;
+    margin: 0 24px;
   }
   .header {
     display: flex;
@@ -168,25 +174,23 @@
   }
 </style>
 
-<div class="container absolute z-999999"
+<div class="maincontainer absolute z-999999 flex justify-center"
 transition:slide={{ duration: 1000, axis: 'y' }}>
-  <div class="header">
-    <div class="back-button" aria-label="Back">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="#000000"/>
-      </svg>
-    </div>
-  </div>
-
-  <h1 class="title">Let's Explore Menu</h1>
-
-  <div class="list">
-    {#each store.data as dish}
-      <a class="card" href="/dish/{dish.original_name}">
-        <div class="card-title">{dish.original_name}</div>
-        <div class="card-subtitle">{dish.translated_name}</div>
-	  </a>
-    {/each}
+  <div class="innercontainer">
+	<div class="header">
+		<button onclick={() => store.data = []}><img src="/icons/back.svg" alt="Back"></button>
+	  </div>
+	
+	  <h1 class="title">Let's Explore Menu</h1>
+	
+	  <div class="list">
+		{#each store.data as dish}
+		  <a class="card" href="/dish/{dish.original_name}">
+			<div class="card-title">{dish.original_name}</div>
+			<div class="card-subtitle">{dish.translated_name}</div>
+		  </a>
+		{/each}
+	  </div>
   </div>
 </div>
 {/if}

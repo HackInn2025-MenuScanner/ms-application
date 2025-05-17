@@ -10,6 +10,7 @@
   const maxStars = 5;
   const stars = Array.from({ length: maxStars }, (_, i) => i < rating);
 
+  console.log(dishData);
   // Extract the first paragraph of the description
   const shortDesc = dishData.description.description.split("\n\n")[0];
 </script>
@@ -18,13 +19,14 @@
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    height: 100vh;
+    min-height: 100vh;
     background: white;
+    padding: 1rem;
   }
-  .container {
+  .maincontainer {
+    width: min(95vw, 600px);
     max-width: 600px;
     margin: 0 24px;
-    padding: 1rem;
   }
   .image-container {
     width: 100%;
@@ -75,9 +77,9 @@
 </style>
 
 <div class="main">
-    <div class="container">
+    <div class="maincontainer">
         <!-- Back Button -->
-         <div class="w-full mb-10">
+         <div class="w-full mb-8">
             <a href="/"><img src="/icons/back.svg" alt="Back"></a>
          </div>
 
