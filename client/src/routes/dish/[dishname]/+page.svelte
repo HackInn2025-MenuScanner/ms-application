@@ -21,7 +21,7 @@
     align-items: flex-start;
     min-height: 100vh;
     background: white;
-    padding: 1rem;
+    padding: 1rem 1rem 0 1rem;
   }
   .maincontainer {
     width: min(95vw, 600px);
@@ -64,7 +64,7 @@
     border-top: 1px solid #eee;
     margin: 0.75rem 0;
   }
-  .calories {
+  .nutritionInfo {
     display: flex;
     align-items: center;
     font-size: 0.9rem;
@@ -72,7 +72,23 @@
   }
   .calories::before {
     content: "🔥";
-    margin-right: 0.5rem;
+    margin-right: 1px;
+  }
+  .protein::before {
+    content: "🥩";
+    margin-right: 1px;
+  }
+  .fat::before {
+    content: "🍔";
+    margin-right: 1px;
+  }
+  .fiber::before {
+    content: "🥦";
+    margin-right: 1px;
+  }
+  .carbs::before {
+    content: "🍕";
+    margin-right: 1px;
   }
 
   .skeleton {
@@ -126,10 +142,16 @@
     margin: 0.5rem 0;
   }
 
-  .skeleton-calories {
-    width: 40%;
+  .skeleton-nutrition {
+    width: 5rem;
     height: 0.9rem;
     margin-top: 0.75rem;
+  }
+
+  .skeleton-tag {
+    width: 5rem;
+    height: 2rem;
+    margin-top: 0.5rem;
   }
 </style>
 
@@ -167,6 +189,19 @@
                 {/each}
             {/await}
         </div>
+
+        <!-- Tags -->
+        <div class="flex gap-2 flex-wrap">
+            {#await dishDataPromise}
+                {#each { length: 4 }}
+                    <div class="skeleton skeleton-tag"></div>
+                {/each}
+            {:then dishData} 
+                {#each dishData.description.tags as tag}
+                    <span class="p-1 border border-gray-600 rounded-md text-sm text-gray-600">{tag}</span>
+                {/each}
+            {/await}
+        </div>
       
         <!-- Short Description -->
         {#await dishDataPromise}
@@ -175,13 +210,37 @@
             <p class="desc">{dishData.description.description.split("\n\n")[0]}</p>
         {/await}
       
-        <hr />
-      
-        <!-- Calorie Info -->
-        {#await dishDataPromise}
-            <div class="skeleton skeleton-calories"></div>
-        {:then dishData}
-            <div class="calories">{dishData.nutrition.nutrients.calories} Calories</div>
-        {/await}
+        <div class="sticky bottom-4 bg-white shadow-[0_-4px_6px_3px_white]">
+          <hr />
+          <div class="flex flex-wrap gap-4">
+            <!-- Calorie Info -->
+            {#await dishDataPromise}
+            <div class="skeleton skeleton-nutrition"></div>
+            {:then dishData}
+            <div class="nutritionInfo calories">{dishData.nutrition.nutrients.calories} Calories</div>
+            {/await}
+  
+            <!-- Protein Info -->
+            {#await dishDataPromise}
+              <div class="skeleton skeleton-nutrition"></div>
+            {:then dishData}
+              <div class="nutritionInfo protein">{dishData.nutrition.nutrients.protein_g} Protein</div>
+            {/await}
+  
+            <!-- Carbs -->
+            {#await dishDataPromise}
+              <div class="skeleton skeleton-nutrition"></div>
+            {:then dishData}
+              <div class="nutritionInfo carbs">{dishData.nutrition.nutrients.carbs_g} Carbs</div>
+            {/await}
+  
+            <!-- Fat -->
+            {#await dishDataPromise}
+              <div class="skeleton skeleton-nutrition"></div>
+            {:then dishData}
+              <div class="nutritionInfo fat">{dishData.nutrition.nutrients.fat_g} Fat</div>
+            {/await}
+          </div>
+        </div>
       </div>
 </div>
