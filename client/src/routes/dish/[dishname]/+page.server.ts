@@ -2,9 +2,12 @@ import { store } from '$lib/store.svelte';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
-    const response = await fetch("http://backend:8000/dish/" + params.dishname + "?language=" + store.language, {
+const response = await fetch(
+    `http://backend:8000/dish/${encodeURIComponent(params.dishname)}?language=${encodeURIComponent(store.language)}`, 
+    {
         method: "GET"
-    });
+    }
+);
     //console.log(response)
     const dishData: {dish_name: string, nutrition: {}, image: {dish_name: string, image_url: string}, description: {}} = await response.json();
 

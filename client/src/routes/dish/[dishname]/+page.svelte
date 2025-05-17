@@ -13,35 +13,22 @@
   // Extract the first paragraph of the description
   const shortDesc = dishData.description.description.split("\n\n")[0];
 </script>
-<a href="/">Back</a>
 <style>
-  .card {
-    width: 360px;
-    margin: 1rem auto;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    padding: 1rem;
-    font-family: system-ui, sans-serif;
-  }
-  .back {
-    background: #ffca28;
-    border: none;
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
+  .main {
     display: flex;
-    align-items: center;
     justify-content: center;
-    cursor: pointer;
-    margin-bottom: 0.5rem;
+    align-items: flex-start;
+    height: 100vh;
+    background: white;
   }
-  .back:hover {
-    background: #ffc107;
+  .container {
+    max-width: 600px;
+    margin: 0 24px;
+    padding: 1rem;
   }
   .image-container {
     width: 100%;
-    height: 200px;
+    aspect-ratio: 1 / 1;
     overflow: hidden;
     border-radius: 8px;
     border: 1px solid #ddd;
@@ -87,30 +74,35 @@
   }
 </style>
 
-<div class="card">
-  <!-- Back Button -->
-  <button class="back" aria-label="Go back" on:click={() => history.back()}>&larr;</button>
+<div class="main">
+    <div class="container">
+        <!-- Back Button -->
+         <div class="w-full mb-10">
+            <a href="/"><img src="/icons/back.svg" alt="Back"></a>
+         </div>
 
-  <!-- Dish Image -->
-  <div class="image-container">
-    <img src="{dishData.image.image_url}" alt="{dishData.dish_name}" />
-  </div>
-
-  <!-- Dish Name -->
-  <h2>{dishData.dish_name}</h2>
-
-  <!-- Star Rating -->
-  <div class="rating">
-    {#each stars as full, idx}
-      <span class="star">{full ? '★' : '☆'}</span>
-    {/each}
-  </div>
-
-  <!-- Short Description -->
-  <p class="desc">{shortDesc}</p>
-
-  <hr />
-
-  <!-- Calorie Info -->
-  <div class="calories">{dishData.nutrition.nutrients.calories} Calories</div>
+      
+        <!-- Dish Image -->
+        <div class="image-container">
+          <img src="{dishData.image.image_url}" alt="{dishData.dish_name}" />
+        </div>
+      
+        <!-- Dish Name -->
+        <h2>{dishData.dish_name}</h2>
+      
+        <!-- Star Rating -->
+        <div class="rating">
+          {#each stars as full, idx}
+            <span class="star">{full ? '★' : '☆'}</span>
+          {/each}
+        </div>
+      
+        <!-- Short Description -->
+        <p class="desc">{shortDesc}</p>
+      
+        <hr />
+      
+        <!-- Calorie Info -->
+        <div class="calories">{dishData.nutrition.nutrients.calories} Calories</div>
+      </div>
 </div>
