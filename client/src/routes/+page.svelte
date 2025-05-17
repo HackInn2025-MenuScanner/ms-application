@@ -22,7 +22,7 @@
 		document.body.appendChild(script);
 
 		try {
-			stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+			stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
 			if (video) {
 				video.srcObject = stream;
 				await video.play();
@@ -118,30 +118,76 @@
 {/if}
 
 {#if store.data.length}
-	<div
-		class="selection_screen w-screen flex flex-col p-[10px] pt-8 z-99999 rounded-t-4xl absolute bottom-0 h-[calc(100vh+32px)] items-center justify-center bg-white overflow-auto"
-		transition:slide={{ duration: 1000, axis: 'y' }}
-	>
-  {#each store.data as item}
-  <a 
-  href="/dish/{item.original_name}"
-  style="border: 1px solid black;
-    border-radius: 10px;
-    width: 100%;
-    margin: 12px;
-    padding: 5px;
-    display: grid;
-    grid-template-rows: 1fr 1fr;
-    grid-template-columns: 1fr 24px;">
-    <div>{item.original_name}</div>
-    <div style="font-size: 12px; color: grey;">{"(" + item.translated_name + ")"}</div>
-    <div class="w-3 h-2" style="background-image: url(/icons/back.svg); margin: auto; background-repeat: no-repeat; grid-column: 2; grid-row-start: 1; grid-row-end: 3;"></div>
-  </a>
-  {/each}
+<style>
+  .container {
+    padding: 1rem;
+    background: #FFFFFF;
+    min-height: 100vh;
+    box-sizing: border-box;
+  }
+  .header {
+    display: flex;
+    align-items: center;
+  }
+  .back-button {
+    width: 2.5rem;
+    height: 2.5rem;
+    background: #F3C742;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .title {
+    margin: 1rem 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #000000;
+  }
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .card {
+    border: 2px solid #F3C742;
+    border-radius: 8px;
+    padding: 1rem;
+  }
+  .card-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    border-bottom: 1px solid #000000;
+    padding-bottom: 0.25rem;
+    margin-bottom: 0.25rem;
+  }
+  .card-subtitle {
+    font-size: 0.9rem;
+    color: #555555;
+  }
+</style>
 
-  <button onclick={() => store.data = []}>
-    Retry
-  </button>
+<div class="container absolute z-999999"
+transition:slide={{ duration: 1000, axis: 'y' }}>
+  <div class="header">
+    <div class="back-button" aria-label="Back">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="#000000"/>
+      </svg>
+    </div>
+  </div>
+
+  <h1 class="title">Let's Explore Menu</h1>
+
+  <div class="list">
+    {#each store.data as dish}
+      <a class="card" href="/dish/{dish.original_name}">
+        <div class="card-title">{dish.original_name}</div>
+        <div class="card-subtitle">{dish.translated_name}</div>
+	  </a>
+    {/each}
+  </div>
 </div>
 {/if}
 
