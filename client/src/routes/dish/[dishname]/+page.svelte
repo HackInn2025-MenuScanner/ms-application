@@ -13,6 +13,37 @@
   const rating = 4;
   const maxStars = 5;
   const stars = Array.from({ length: maxStars }, (_, i) => i < rating);
+
+
+  type SupportedLanguage = 'en-US' | 'de-DE' | 'fr-FR';
+
+  interface Translations {
+    calories: string;
+    protein: string;
+    carbs: string;
+    fat: string;
+  }
+
+  const translations: Record<SupportedLanguage, Translations> = {
+    'en-US': {
+      calories: 'Calories',
+      protein: 'Protein',
+      carbs: 'Carbs',
+      fat: 'Fat',
+    },
+    'de-DE': {
+      calories: 'Kalorien',
+      protein: 'Protein',
+      carbs: 'Kohlenhydrate',
+      fat: 'Fett',
+    },
+    'fr-FR': {
+      calories: 'Calories',
+      protein: 'Protéines',
+      carbs: 'Glucides',
+      fat: 'Lipides',
+    },
+  };
 </script>
 <style>
   .main {
@@ -210,37 +241,37 @@
             <p class="desc">{dishData.description.description.split("\n\n")[0]}</p>
         {/await}
       
-        <div class="sticky bottom-4 bg-white shadow-[0_-4px_6px_3px_white]">
+        <div class="sticky bottom-0 pb-4 bg-white shadow-[0_-4px_6px_3px_white]">
           <hr />
           <div class="flex flex-wrap gap-4">
             <!-- Calorie Info -->
             {#await dishDataPromise}
             <div class="skeleton skeleton-nutrition"></div>
             {:then dishData}
-            <div class="nutritionInfo calories">{dishData.nutrition.nutrients.calories} Calories</div>
+            <div class="nutritionInfo calories">{dishData.nutrition.nutrients.calories} {translations[store.language as SupportedLanguage].calories}</div>
             {/await}
   
             <!-- Protein Info -->
             {#await dishDataPromise}
               <div class="skeleton skeleton-nutrition"></div>
             {:then dishData}
-              <div class="nutritionInfo protein">{dishData.nutrition.nutrients.protein_g} Protein</div>
+              <div class="nutritionInfo protein">{dishData.nutrition.nutrients.protein_g} {translations[store.language as SupportedLanguage].protein}</div>
             {/await}
   
             <!-- Carbs -->
             {#await dishDataPromise}
               <div class="skeleton skeleton-nutrition"></div>
             {:then dishData}
-              <div class="nutritionInfo carbs">{dishData.nutrition.nutrients.carbs_g} Carbs</div>
+              <div class="nutritionInfo carbs">{dishData.nutrition.nutrients.carbs_g} {translations[store.language as SupportedLanguage].carbs}</div>
             {/await}
   
             <!-- Fat -->
             {#await dishDataPromise}
               <div class="skeleton skeleton-nutrition"></div>
             {:then dishData}
-              <div class="nutritionInfo fat">{dishData.nutrition.nutrients.fat_g} Fat</div>
+              <div class="nutritionInfo fat">{dishData.nutrition.nutrients.fat_g} {translations[store.language as SupportedLanguage].fat}</div>
             {/await}
           </div>
-        </div>
       </div>
+    </div>
 </div>
