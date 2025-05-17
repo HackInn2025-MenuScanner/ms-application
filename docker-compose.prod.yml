@@ -15,3 +15,34 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
+
+  nginx:
+    container_name: dishfinder-nginx
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx.prod.conf:/etc/nginx/conf.d/default.conf
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    depends_on:
+      - client
+      - backend
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes: 
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: ""
+    command: >
+      sh -c "certbot certonly --webroot 
+      --webroot-path=/var/www/certbot 
+      --email florian.goeth@gmail.com 
+      --agree-tos 
+      --no-eff-email 
+      --keep-until-expiring 
+      -d dishfinder.f99.one"

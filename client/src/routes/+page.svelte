@@ -5,11 +5,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
+  import { store } from "$lib/store.svelte";
+  import { apiCall } from "$lib/api";
 
 	let video: HTMLVideoElement;
 	let canvas: HTMLCanvasElement;
 	let stream: MediaStream | null = null;
 	let capturing = $state(false);
+  //let data: {original_name: string, translated_name: string}[] = $state([{original_name: "Hühnchen Schnitzel", translated_name: "Chicken Schnitzel"}]);
 
 	onMount(async () => {
 		// Dynamically load Tesseract script
@@ -19,7 +22,7 @@
 		document.body.appendChild(script);
 
 		try {
-			stream = await navigator.mediaDevices.getUserMedia({ video: true });
+			stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
 			if (video) {
 				video.srcObject = stream;
 				await video.play();
@@ -32,6 +35,10 @@
 			showIntroScreen = false;
 		}, 1000);
 	});
+
+	function changeLanguage(): void {
+    console.log("Change Language");
+  }
 
 	async function captureAndRecognize(): Promise<void> {
 		showLoader = true;
@@ -58,16 +65,10 @@
 			});
 			console.log('OCR Result:', result.data.text);
 			//Make api calls
-			const res = await fetch('/api/fastapi', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ menu_text: result.data.text, language: 'de' })
-			});
-			const data = await res.json();
+      const res = await apiCall("POST", "/menu/translate", { menu_text: result.data.text, language: 'de' });
 
-			//Show new Page
+			store.data = (await res.json()).items;
 			showLoader = false;
-			showSelectionScreen = true;
 		} catch (error) {
 			console.error('OCR failed:', error);
 		}
@@ -98,13 +99,12 @@
 	}
 
 	let showIntroScreen = $state(true);
-	let showSelectionScreen = $state(false);
 	let showLoader = $state(false);
 </script>
 
 {#if showIntroScreen}
 	<div
-		class="intro_screen flex h-full w-full items-center justify-center bg-white"
+		class="intro_screen flex h-full w-full items-center justify-center bg-white z-999 absolute"
 		transition:fade={{ duration: 200 }}
 	>
 		<div
@@ -117,11 +117,32 @@
 	</div>
 {/if}
 
-{#if showSelectionScreen}
+{#if store.data.length}
 	<div
-		class="selection_screen z-99999 rounded-t-4xl absolute bottom-0 flex h-[calc(100vh+32px)] w-full items-center justify-center bg-white"
+		class="selection_screen w-screen flex flex-col p-[10px] pt-8 z-99999 rounded-t-4xl absolute bottom-0 h-[calc(100vh+32px)] items-center justify-center bg-white overflow-auto"
 		transition:slide={{ duration: 1000, axis: 'y' }}
-	></div>
+	>
+  {#each store.data as item}
+  <a 
+  href="/dish/{item.original_name}"
+  style="border: 1px solid black;
+    border-radius: 10px;
+    width: 100%;
+    margin: 12px;
+    padding: 5px;
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 1fr 24px;">
+    <div>{item.original_name}</div>
+    <div style="font-size: 12px; color: grey;">{"(" + item.translated_name + ")"}</div>
+    <div class="w-3 h-2" style="background-image: url(/icons/back.svg); margin: auto; background-repeat: no-repeat; grid-column: 2; grid-row-start: 1; grid-row-end: 3;"></div>
+  </a>
+  {/each}
+
+  <button onclick={() => store.data = []}>
+    Retry
+  </button>
+</div>
 {/if}
 
 {#if showLoader}
@@ -138,9 +159,16 @@
 	></div>
 {/if}
 
-<video class="absolute h-full w-full object-cover" bind:this={video} autoplay playsinline>
-	<track kind="captions" />
+<video class="absolute h-full w-full object-cover z-9" bind:this={video} autoplay playsinline>
+	<track kind="captions"/>
 </video>
+
+<button 
+onclick={changeLanguage}
+class="absolute top-6 right-6 w-12 h-6 z-10">
+  <div class="w-8 h-6" style="background-image: url(/icons/german.svg)"></div>
+  <div class="w-3 h-2 left-9 top-2 absolute" style="background-image: url(/icons/back.svg); background-repeat: no-repeat;"></div>
+</button>
 
 <button
 	onclick={captureAndRecognize}
