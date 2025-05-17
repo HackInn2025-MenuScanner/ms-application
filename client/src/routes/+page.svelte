@@ -37,8 +37,8 @@
 	});
 
 	function changeLanguage(): void {
-    console.log("Change Language");
-  }
+		showLanguageSelect = !showLanguageSelect;
+	}
 
 	async function captureAndRecognize(): Promise<void> {
 		showLoader = true;
@@ -65,7 +65,7 @@
 			});
 			console.log('OCR Result:', result.data.text);
 			//Make api calls
-      const res = await apiCall("POST", "/menu/translate", { menu_text: result.data.text, language: 'de' });
+      const res = await apiCall("POST", "/menu/translate", { menu_text: result.data.text, language: store.language });
 
 			store.data = (await res.json()).items;
 			showLoader = false;
@@ -100,6 +100,13 @@
 
 	let showIntroScreen = $state(true);
 	let showLoader = $state(false);
+	let showLanguageSelect = $state(false);
+
+	const langMap = {
+		"en-US": "/icons/american.svg",
+		"de-DE": "/icons/german.svg",
+		"fr-FR": "/icons/french.svg"
+	};
 </script>
 
 {#if showIntroScreen}
@@ -213,12 +220,22 @@ transition:slide={{ duration: 1000, axis: 'y' }}>
 	<track kind="captions"/>
 </video>
 
-<button 
-onclick={changeLanguage}
-class="absolute top-6 right-6 w-12 h-6 z-10">
-  <div class="w-8 h-6" style="background-image: url(/icons/german.svg)"></div>
-  <div class="w-3 h-2 left-9 top-2 absolute" style="background-image: url(/icons/back.svg); background-repeat: no-repeat;"></div>
-</button>
+<div class="absolute top-6 right-6 w-12 h-6 z-10">
+	<button onclick={changeLanguage} class="cursor-pointer">
+		<div class="w-8 h-8" style="background-image: url({langMap[store.language as "de-de" | "en-us"]})"></div>
+		<div class="w-3 h-2 left-9 top-3 absolute {showLanguageSelect ? "-scale-y-100" : ""}">
+			<img src="/icons/down_white.svg" alt="">
+		</div>
+	</button>
+	{#if showLanguageSelect}
+	<div class="mt-1 w-8 rounded-sm flex flex-col gap-0.5">
+		{#each Object.entries(langMap).filter(e => e[0] !== store.language) as [lang, icon]}
+		<button class="w-8 h-8 cursor-pointer" style="background-image: url({icon})" class:opacity-50={store.language === lang} onclick={() => {store.language = lang; showLanguageSelect = false;}} aria-label={lang}></button>
+		{/each}
+	</div>
+	{/if}
+</div>
+
 
 <button
 	onclick={captureAndRecognize}

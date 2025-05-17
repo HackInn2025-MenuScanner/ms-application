@@ -1,18 +1,18 @@
 <script lang="ts">
-	import type { PageProps } from './$types';
+    import { page } from '$app/state';
+	import { apiCall } from '$lib/api';
+	import { store } from '$lib/store.svelte';
 
-	let { data }: PageProps = $props();
-    let dishData = data.dishData;
-
+    let dishDataPromise = (async () => {
+        const result = await apiCall("GET", "/dish/" + encodeURIComponent(page.params.dishname), { language: store.language });
+        const data = await result.json();
+        return data;
+    })();
 
   // Example static rating (1-5) – could be made dynamic later
   const rating = 4;
   const maxStars = 5;
   const stars = Array.from({ length: maxStars }, (_, i) => i < rating);
-
-  console.log(dishData);
-  // Extract the first paragraph of the description
-  const shortDesc = dishData.description.description.split("\n\n")[0];
 </script>
 <style>
   .main {
@@ -74,6 +74,63 @@
     content: "🔥";
     margin-right: 0.5rem;
   }
+
+  .skeleton {
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    position: relative; /* Added for pseudo-element positioning */
+    overflow: hidden; /* Added to clip the pseudo-element */
+  }
+
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%; /* Start off-screen to the left */
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, transparent 0%, rgba(255, 255, 255, 0.5) 50%, transparent 100%);
+    animation: flash 2s linear infinite; /* Apply new animation */
+  }
+
+  @keyframes flash {
+    0% {
+      left: -100%;
+    }
+    100% {
+      left: 100%; /* Move from left to right */
+    }
+  }
+
+  .skeleton-image {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    margin-bottom: 0.75rem;
+  }
+
+  .skeleton-title {
+    width: 70%;
+    height: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .skeleton-rating {
+    width: 50%;
+    height: 1.1rem;
+    margin: 0.5rem 0;
+  }
+
+  .skeleton-desc {
+    width: 90%;
+    height: 4rem;
+    margin: 0.5rem 0;
+  }
+
+  .skeleton-calories {
+    width: 40%;
+    height: 0.9rem;
+    margin-top: 0.75rem;
+  }
 </style>
 
 <div class="main">
@@ -86,25 +143,45 @@
       
         <!-- Dish Image -->
         <div class="image-container">
-          <img src="{dishData.image.image_url}" alt="{dishData.dish_name}" />
+            {#await dishDataPromise}
+                <div class="skeleton skeleton-image"></div>
+            {:then dishData} 
+                <img src="{dishData.image.image_url}" alt="{dishData.dish_name}" />
+            {/await}
         </div>
       
         <!-- Dish Name -->
-        <h2>{dishData.dish_name}</h2>
+        {#await dishDataPromise}
+            <div class="skeleton skeleton-title"></div>
+        {:then dishData} 
+            <h2>{dishData.dish_name}</h2>
+        {/await}
       
         <!-- Star Rating -->
         <div class="rating">
-          {#each stars as full, idx}
-            <span class="star">{full ? '★' : '☆'}</span>
-          {/each}
+            {#await dishDataPromise}
+                <div class="skeleton skeleton-rating"></div>
+            {:then} 
+                {#each stars as full, idx}
+                    <span class="star">{full ? '★' : '☆'}</span>
+                {/each}
+            {/await}
         </div>
       
         <!-- Short Description -->
-        <p class="desc">{shortDesc}</p>
+        {#await dishDataPromise}
+            <div class="skeleton skeleton-desc h-6"></div>
+        {:then dishData} 
+            <p class="desc">{dishData.description.description.split("\n\n")[0]}</p>
+        {/await}
       
         <hr />
       
         <!-- Calorie Info -->
-        <div class="calories">{dishData.nutrition.nutrients.calories} Calories</div>
+        {#await dishDataPromise}
+            <div class="skeleton skeleton-calories"></div>
+        {:then dishData}
+            <div class="calories">{dishData.nutrition.nutrients.calories} Calories</div>
+        {/await}
       </div>
 </div>
