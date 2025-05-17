@@ -22,7 +22,7 @@
 		document.body.appendChild(script);
 
 		try {
-			stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+			stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
 			if (video) {
 				video.srcObject = stream;
 				await video.play();
