@@ -8,6 +8,8 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+    volumes:
+      - ./client:/app
 
   backend:
     build:
@@ -15,6 +17,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
+    volumes:
+      - ./backend:/app
 
   nginx:
     container_name: dishfinder-nginx
